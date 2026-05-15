@@ -1,4 +1,4 @@
-CREATE TABLE master_user IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS master_user  (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     display_name VARCHAR(100) NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE master_user IF NOT EXISTS (
     saldo NUMERIC(12, 2) DEFAULT 0.00
 );
 
-CREATE TABLE master_restoran IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS master_restoran  (
     restoran_id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     display_name VARCHAR(100) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE master_restoran IF NOT EXISTS (
     phone VARCHAR(20) NOT NULL
 );
 
-CREATE TABLE food IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS food  (
     food_id SERIAL PRIMARY KEY,
     restoran_id INT REFERENCES master_restoran(restoran_id) ON DELETE CASCADE,
     url_img TEXT,
@@ -29,13 +29,13 @@ CREATE TABLE food IF NOT EXISTS (
     stok INT DEFAULT 0
 );
 
-CREATE TABLE favorit_user IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS favorit_user  (
     user_id INT REFERENCES master_user(user_id) ON DELETE CASCADE,
     food_id INT REFERENCES food(food_id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, food_id)
 );
 
-CREATE TABLE rating_review IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS rating_review  (
     feedback_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES master_user(user_id) ON DELETE CASCADE,
     food_id INT REFERENCES food(food_id) ON DELETE CASCADE,
@@ -44,7 +44,7 @@ CREATE TABLE rating_review IF NOT EXISTS (
     feedback_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE order_header IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS order_header   (
     order_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES master_user(user_id) ON DELETE CASCADE,
     restoran_id INT REFERENCES master_restoran(restoran_id) ON DELETE CASCADE,
@@ -54,7 +54,7 @@ CREATE TABLE order_header IF NOT EXISTS (
     location TEXT NOT NULL
 );
 
-CREATE TABLE order_detail IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS order_detail  (
     order_detail_id SERIAL PRIMARY KEY,
     order_id INT REFERENCES order_header(order_id) ON DELETE CASCADE,
     food_id INT REFERENCES food(food_id) ON DELETE CASCADE,
@@ -62,7 +62,7 @@ CREATE TABLE order_detail IF NOT EXISTS (
     total_harga_food NUMERIC(12, 2) NOT NULL
 );
 
-CREATE TABLE bills IF NOT EXISTS (
+CREATE TABLE IF NOT EXISTS bills  (
     bill_id SERIAL PRIMARY KEY,
     order_id INT UNIQUE REFERENCES order_header(order_id) ON DELETE CASCADE,
     total_amount NUMERIC(12, 2) NOT NULL,
