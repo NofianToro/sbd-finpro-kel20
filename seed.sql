@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS master_user  (
     saldo NUMERIC(12, 2) DEFAULT 0.00
 );
 
-CREATE TABLE IF NOT EXISTS master_restoran  (
-    restoran_id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS master_restaurant  (
+    restaurant_id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     display_name VARCHAR(100) NOT NULL,
     url_img TEXT,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS master_restoran  (
 
 CREATE TABLE IF NOT EXISTS food  (
     food_id SERIAL PRIMARY KEY,
-    restoran_id INT REFERENCES master_restoran(restoran_id) ON DELETE CASCADE,
+    restaurant_id INT REFERENCES master_restaurant(restaurant_id) ON DELETE CASCADE,
     url_img TEXT,
     url_video TEXT,
     price NUMERIC(10, 2) NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS rating_review  (
 CREATE TABLE IF NOT EXISTS order_header   (
     order_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES master_user(user_id) ON DELETE CASCADE,
-    restoran_id INT REFERENCES master_restoran(restoran_id) ON DELETE CASCADE,
+    restaurant_id INT REFERENCES master_restaurant(restaurant_id) ON DELETE CASCADE,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     order_amount NUMERIC(12, 2) NOT NULL,
     order_status VARCHAR(20) NOT NULL,
