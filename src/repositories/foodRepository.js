@@ -3,13 +3,13 @@ const db = require("../database/db");
 
 const foodRepository ={
     createFood: async (foodData) => {
-        const { restoran_id, food_name, url_img, url_video, price, category, description, stok } = foodData;
+        const { restaurant_id, food_name, url_img, url_video, price, category, description, stok } = foodData;
         const query =`
-                INSERT INTO food (restoran_id, food_name, url_img, url_video, price, category, description, stok)
+                INSERT INTO food (restaurant_id, food_name, url_img, url_video, price, category, description, stok)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                 RETURNING food_id, food_name, url_img, url_video, price, category, description, stok;
             `;
-        const values = [restoran_id, food_name, url_img, url_video, price, category, description, stok]
+        const values = [restaurant_id, food_name, url_img, url_video, price, category, description, stok]
 
         try {
             const result = await db.query(query, values);
@@ -36,10 +36,10 @@ const foodRepository ={
             throw error;
         }
     },
-    getFoodbyRestaurantId: async (restoran_id) => {
-        const query = `SELECT * FROM food WHERE restoran_id = $1;`;
+    getFoodbyRestaurantId: async (restaurant_id) => {
+        const query = `SELECT * FROM food WHERE restaurant_id = $1;`;
         try {
-            const result = await db.query(query, restoran_id);
+            const result = await db.query(query, restaurant_id);
             result.rows;
         } catch (error) {
             throw error;
