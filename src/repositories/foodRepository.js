@@ -39,8 +39,8 @@ const foodRepository ={
     getFoodbyRestaurantId: async (restaurant_id) => {
         const query = `SELECT * FROM food WHERE restaurant_id = $1;`;
         try {
-            const result = await db.query(query, restaurant_id);
-            result.rows;
+            const result = await db.query(query, [restaurant_id]);
+            return result.rows;
         } catch (error) {
             throw error;
         }

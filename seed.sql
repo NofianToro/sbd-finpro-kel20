@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS master_restaurant  (
 CREATE TABLE IF NOT EXISTS food  (
     food_id SERIAL PRIMARY KEY,
     restaurant_id INT REFERENCES master_restaurant(restaurant_id) ON DELETE CASCADE,
-    food_id VARCHAR(100) NOT NULL,
+    food_name VARCHAR(100) NOT NULL,
     url_img TEXT,
     url_video TEXT,
     price NUMERIC(10, 2) NOT NULL,
