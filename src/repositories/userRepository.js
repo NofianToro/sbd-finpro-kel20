@@ -27,6 +27,41 @@ const userRepository = {
       throw error;
     }
   },
+
+  getAllUser: async () => {
+    const query = `SELECT * FROM master_user ORDER BY user_id ASC;`;
+    try {
+      const result = await db.query(query);
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  },
+  getUserById: async (user_id) => {
+    const query = `SELECT * FROM master_user WHERE user_id = $1;`;
+
+    try {
+      const result = await db.query(query, [user_id]);
+      return result.rows[0];
+    } catch (error) {
+      throw error;
+    }
+  },
+  updateSaldo: async (user_id, saldo) => {
+    const query = `
+            UPDATE master_user
+            SET saldo = $1
+            WHERE user_id = $2
+            RETURNING *;
+        `;
+
+    try {
+      const result = await db.query(query, [saldo, user_id]);
+      return result.rows[0];
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 module.exports = userRepository;
