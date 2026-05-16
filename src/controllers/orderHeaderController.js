@@ -1,4 +1,5 @@
 const orderHeaderRepo = require("../repositories/orderHeaderRepository");
+const restaurantRepository = require("../repositories/restaurantRepository");
 
 const orderHeaderController = {
     createOrderHeader: async (req, res) => {
@@ -41,7 +42,6 @@ const orderHeaderController = {
             });
         }
     },
-
     getAllOrderHeader: async (req, res) => {
         try {
             const orders = await orderHeaderRepo.getAllOrderHeader();
@@ -50,6 +50,60 @@ const orderHeaderController = {
                 success: true,
                 message: "Successfully retrieved orders",
                 data: orders,
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                data: error.message,
+            });
+        }
+    },
+    getOrderHeaderbyOrderId: async (req, res) => {
+        try {
+            const { order_id } = req.params;
+            const order = await orderHeaderRepo.getOrderHeaderById(order_id);
+
+            res.status(200).json({
+                success: true,
+                message: "Successfully retrieved order header",
+                data: user,
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                data: error.message,
+            });
+        }
+    },
+    getOrderHeaderbyUserId: async (req, res) => {
+        try {
+            const { user_id } = req.params;
+            const order = await orderHeaderRepo.getOrderHeaderByUserId(user_id);
+
+            res.status(200).json({
+                success: true,
+                message: "Successfully retrieved order header",
+                data: user,
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                data: error.message,
+            });
+        }
+    },
+    getOrderHeaderByRestaurantId: async (req, res) => {
+        try {
+            const { restaurant_id } = req.params;
+            const order = await orderHeaderRepo.getOrderHeaderById(restaurant_id);
+
+            res.status(200).json({
+                success: true,
+                message: "Successfully retrieved order header",
+                data: user,
             });
         } catch (error) {
             res.status(500).json({

@@ -1,7 +1,6 @@
 const ratingReviewRepo = require('../repositories/ratingReviewRepository');
 
 const ratingReviewController = {
-
     createReview: async (req, res) => {
         const {
             user_id,
@@ -39,7 +38,31 @@ const ratingReviewController = {
                 data: error.message
             });
         }
-    }
+    },
+    getReviewByFoodId: async (req, res) => {
+        try {
+            const { food_id }  = req.params;
+            const rating = await ratingReviewRepo.getReviewByFoodId(food_id);
+            if (!restaurant) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Rating not found',
+                    data: null,
+                });
+            }
+            res.status(200).json({
+                success: true,
+                message: `Successfully retrieve rating`,
+                data: rating,
+            });
+        } catch (error) {
+            res.status(500).json({
+                success:false,
+                message: 'Internal Server Error',
+                data: error.message,
+            });
+        }
+    },
 };
 
 module.exports = ratingReviewController;

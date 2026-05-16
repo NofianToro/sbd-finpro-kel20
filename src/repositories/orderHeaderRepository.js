@@ -49,6 +49,26 @@ const orderHeaderRepository = {
             throw error;
         }
     },
+    getOrderHeaderByUserId: async (user_id) => {
+        const query = `SELECT * FROM order_header WHERE user_id = $1;`;
+
+        try {
+            const result = await db.query(query, [user_id]);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
+    },
+    getOrderHeaderByRestaurantId: async (restaurant_id) => {
+        const query = `SELECT * FROM order_header WHERE restaurant_id = $1;`;
+
+        try {
+            const result = await db.query(query, [restaurant_id]);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
+    },
 };
 
 module.exports = orderHeaderRepository;

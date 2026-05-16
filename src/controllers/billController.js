@@ -37,7 +37,25 @@ const billController = {
                 data: error.message
             });
         }
-    }
+    },
+    getBillByOrderId:async (req, res) => {
+        try {
+            const { order_id } = req.params;
+            const order = await billRepo.getBillByOrderId(order_id);
+
+            res.status(200).json({
+                success: true,
+                message: "Successfully retrieved bill",
+                data: order,
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                data: error.message,
+            });
+        }
+    },
 };
 
 module.exports = billController;
