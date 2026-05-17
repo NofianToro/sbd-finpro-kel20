@@ -136,9 +136,9 @@ export default function Homepage() {
           <Image src="/KoiBite_logo.png" alt="KoiBite Logo" width={120} height={40} className="object-contain" />
         </div>
         <div className="flex space-x-8 text-lg">
-          <Link href="/explore" className="hover:text-gray-300">Explore</Link>
-          <Link href="/favorites" className="hover:text-gray-300">Favorites</Link>
-          <Link href="/orders" className="hover:text-gray-300">Orders</Link>
+          <Link href="/homepage" className="hover:text-gray-300">Explore</Link>
+          <Link href="/profile" className="hover:text-gray-300">Favorites</Link>
+          <Link href="/profile" className="hover:text-gray-300">Orders</Link>
         </div>
         <div className="flex items-center space-x-6 text-lg">
           <span className="text-sm font-medium">
@@ -152,14 +152,10 @@ export default function Homepage() {
               </div>
             )}
           </div>
-          <div className="flex items-center space-x-2">
+           <Link href="/profile" className="flex items-center space-x-2 hover:text-gray-300">
             <FaUser className="text-xl" />
-            <span>
-              {
-                userProfile?.display_name || "Guest"
-              }
-              </span>
-          </div>
+            <span>{userProfile?.display_name?.split(" ")[0]}</span>
+          </Link>
         </div>
       </header>
 

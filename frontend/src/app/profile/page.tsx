@@ -1,84 +1,62 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaShoppingCart, FaUser, FaTwitter, FaInstagram, FaWallet, FaHeart, FaHistory, FaCog, FaCheckCircle, FaRedo } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
-// --- MOCK DATA ---
-const MOCK_USER = {
-  display_name: "Michael Christian",
-  username: "michael_c",
-  phone: "+62 812-3456-7890",
-  email: "michael.c@example.com",
-  url_profile: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150&auto=format&fit=crop",
-  balance: 150000,
-};
+import {getUserProfile,topUpSaldo} from "../../api/userApi";
+import {getUserOrders} from "../../api/orderApi";
+import {getFavoritesByUserId} from "../../api/favoriteApi";
 
-const MOCK_ORDER_HISTORY = [
-  {
-    id: "KB-8829-XJ",
-    date: "14 May 2026",
-    status: "Done",
-    total_amount: 147000,
-    items: "1x Wagyu Beef Bento, 2x Matcha Mochi Dessert"
-  },
-  {
-    id: "KB-7714-AB",
-    date: "10 May 2026",
-    status: "Done",
-    total_amount: 85000,
-    items: "1x Premium Truffle Salmon Roll"
-  }
-];
-
-const MOCK_FAVORITES = [
-  {
-    id: "1",
-    name: "Premium Truffle Salmon Roll",
-    price: 85000,
-    url_img: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=300&auto=format&fit=crop"
-  },
-  {
-    id: "2",
-    name: "Spicy Tonkotsu Ramen",
-    price: 45000,
-    url_img: "https://images.unsplash.com/photo-1552611052-33e04de081de?q=80&w=300&auto=format&fit=crop"
-  },
-  {
-    id: "3",
-    name: "Matcha Mochi Dessert",
-    price: 20000,
-    url_img: "https://images.unsplash.com/photo-1515037893149-de7f840978e2?q=80&w=300&auto=format&fit=crop"
-  }
-];
 
 export default function ProfileDashboard() {
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("profile");
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userId = localStorage.getItem("user_id");
+        if(!userId) return;
+        const profileResponse =await getUserProfile(userId);
+        setUserProfile(profileResponse.data);
+        const orderResponse = await getUserOrders(userId);
+        setOrders(orderResponse.data || []);
+        const favoriteResponse =await getFavoritesByUserId(userId);
+        setFavorites(favoriteResponse.data || []);
+        } catch(error){
+          console.error(error);
+        }
+    };
 
+    fetchProfile();
+
+}, []);
   return (
     <div className="min-h-screen flex flex-col font-sans text-[#1C1C1C] bg-[#FDFBF7] relative">
       
       {/* HEADER */}
       <header className="h-[80px] bg-[#2D2D2D] text-white flex justify-between items-center px-[80px] shrink-0 z-50">
-        <div className="flex items-center">
-          <Image src="/KoiBite_logo.png" alt="KoiBite Logo" width={120} height={40} className="object-contain" />
-        </div>
+        <Link href="/homepage" className="flex items-center">
+            <Image src="/KoiBite_logo.png" alt="KoiBite Logo" width={120} height={40}className="object-contain" />
+          </Link>
         <div className="flex space-x-8 text-lg">
-          <Link href="/explore" className="hover:text-gray-300">Explore</Link>
-          <Link href="/favorites" className="hover:text-gray-300">Favorites</Link>
-          <Link href="/orders" className="hover:text-gray-300">Orders</Link>
+          <Link href="/homepage" className="hover:text-gray-300">Explore</Link>
+          <Link href="/profile" className="hover:text-gray-300">Favorites</Link>
+          <Link href="/profile" className="hover:text-gray-300">Orders</Link>
         </div>
         <div className="flex items-center space-x-6 text-lg">
-          <span className="text-sm font-medium">Balance: Rp {MOCK_USER.balance.toLocaleString("id-ID")}</span>
-          <div className="relative cursor-pointer">
-            <FaShoppingCart className="text-2xl" />
-          </div>
-          <div className="flex items-center space-x-2">
+          <span className="text-sm font-medium">Balance: Rp {Number(userProfile?.saldo || 0).toLocaleString("id-ID")}</span>
+          <Link href="/checkout" className="relative cursor-pointer">
+          <FaShoppingCart className="text-2xl" />
+          </Link>
+          <Link href="/profile" className="flex items-center space-x-2 hover:text-gray-300">
             <FaUser className="text-xl" />
-            <span>{MOCK_USER.display_name.split(' ')[0]}</span>
-          </div>
+            <span>{userProfile?.display_name?.split(" ")[0]}</span>
+          </Link>
         </div>
       </header>
 
@@ -92,10 +70,10 @@ export default function ProfileDashboard() {
           <div className="flex flex-col items-center mb-8">
             <div className="w-[80px] h-[80px] rounded-full overflow-hidden border-4 border-white shadow-md mb-4 bg-gray-200">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={MOCK_USER.url_profile} alt="Profile" className="w-full h-full object-cover" />
+              <img src={userProfile?.url_profile||"https://i.pinimg.com/736x/cf/cf/4f/cfcf4fb9f3af6ca37b6f96171166decd.jpg"} alt="Profile" className="w-full h-full object-cover" />
             </div>
-            <h2 className="text-xl font-bold text-[#1C1C1C]">{MOCK_USER.display_name}</h2>
-            <p className="text-sm text-gray-500 mb-6">@{MOCK_USER.username}</p>
+            <h2 className="text-xl font-bold text-[#1C1C1C]">{userProfile?.display_name}</h2>
+            <p className="text-sm text-gray-500 mb-6">@{userProfile?.username}</p>
 
             {/* Wallet Box */}
             <div className="w-full bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col gap-2">
@@ -103,9 +81,18 @@ export default function ProfileDashboard() {
                 <FaWallet className="text-[#FF9800]" /> KoiBite Wallet
               </div>
               <div className="flex justify-between items-end">
-                <span className="text-2xl font-bold text-[#FF9800]">Rp {MOCK_USER.balance.toLocaleString("id-ID")}</span>
-                <button className="text-xs font-bold text-white bg-[#1C1C1C] px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors">
-                  Top Up
+                <span className="text-2xl font-bold text-[#FF9800]">Rp {Number(userProfile?.saldo).toLocaleString("id-ID")}</span>
+                <button 
+                  onClick={async () => {
+                    try {
+                      const updated = await topUpSaldo(userProfile.user_id,100000);
+                      setUserProfile(updated.data);
+                    } catch(error){
+                      console.error(error);
+                    }
+                  }}
+                  className="text-xs font-bold text-white bg-[#1C1C1C] px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors">
+                  Top Up +100l
                 </button>
               </div>
             </div>
@@ -154,19 +141,15 @@ export default function ProfileDashboard() {
                 <div className="grid grid-cols-2 gap-6 mb-10">
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-semibold text-gray-500">Display Name</label>
-                    <input type="text" readOnly disabled value={MOCK_USER.display_name} className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-[#1C1C1C] font-medium focus:outline-none" />
+                    <input type="text" readOnly disabled value={userProfile?.display_name || ""}className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-[#1C1C1C] font-medium focus:outline-none" />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-semibold text-gray-500">Username</label>
-                    <input type="text" readOnly disabled value={MOCK_USER.username} className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-[#1C1C1C] font-medium focus:outline-none" />
+                    <input type="text" readOnly disabled value={userProfile?.username || ""}className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-[#1C1C1C] font-medium focus:outline-none" />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-semibold text-gray-500">Phone Number</label>
-                    <input type="text" readOnly disabled value={MOCK_USER.phone} className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-[#1C1C1C] font-medium focus:outline-none" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-gray-500">Email Address</label>
-                    <input type="email" readOnly disabled value={MOCK_USER.email} className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-[#1C1C1C] font-medium focus:outline-none" />
+                    <input type="text" readOnly disabled value={userProfile?.phone} className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-[#1C1C1C] font-medium focus:outline-none" />
                   </div>
                 </div>
 
@@ -189,22 +172,22 @@ export default function ProfileDashboard() {
               >
                 <h2 className="text-2xl font-bold text-[#1C1C1C] mb-8">Order History / 注文履歴</h2>
                 <div className="flex flex-col gap-4">
-                  {MOCK_ORDER_HISTORY.map((order, idx) => (
+                  {orders.map((order, idx) => (
                     <div key={idx} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center gap-3">
-                          <span className="font-bold text-[#1C1C1C]">{order.id}</span>
-                          <span className="text-sm text-gray-500">• {order.date}</span>
+                          <span className="font-bold text-[#1C1C1C]">{order.order_id}</span>
+                          <span className="text-sm text-gray-500">• {new Date(order.order_date).toLocaleDateString("id-ID")}</span>
                         </div>
                         <div className="flex items-center gap-1 bg-green-50 text-[#4CAF50] px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
-                          <FaCheckCircle /> {order.status}
+                          <FaCheckCircle /> {order.order_status}
                         </div>
                       </div>
                       
                       <div className="flex justify-between items-end border-t border-gray-100 pt-4">
                         <div className="flex flex-col gap-1">
                           <span className="text-sm font-semibold text-gray-600 max-w-[400px] truncate">{order.items}</span>
-                          <span className="font-bold text-lg text-[#C62828]">Rp {order.total_amount.toLocaleString("id-ID")}</span>
+                          <span className="font-bold text-lg text-[#C62828]">Rp {Number(order.order_amount).toLocaleString("id-ID")}</span>
                         </div>
                         <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-[#1C1C1C] font-semibold text-sm rounded-lg transition-colors">
                           <FaRedo /> Reorder
@@ -227,11 +210,11 @@ export default function ProfileDashboard() {
               >
                 <h2 className="text-2xl font-bold text-[#1C1C1C] mb-8">Saved Cravings / お気に入り</h2>
                 <div className="grid grid-cols-3 gap-6">
-                  {MOCK_FAVORITES.map((fav, idx) => (
+                  {favorites.map((fav, idx) => (
                     <div key={idx} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow group relative bg-white flex flex-col">
                       <div className="h-[140px] w-full bg-gray-200 relative overflow-hidden">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={fav.url_img} alt={fav.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={fav.url_img} alt={fav.food_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         <div className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md text-[#C62828]">
                           <FaHeart />
                         </div>
