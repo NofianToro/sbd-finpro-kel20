@@ -52,3 +52,12 @@ export const updateOrderStatus = async (order_id, status) => {
     );
     return response.data;
 };
+
+export const getRestaurantOrderItems = async (order_id) => {
+    const token = localStorage.getItem('restaurant_token');
+    const response = await api.get(
+        `/restaurants/orders/${order_id}/items`,
+        restaurantApi(token)
+    );
+    return response.data;
+};

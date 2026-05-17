@@ -6,14 +6,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Package, Utensils, BarChart2, Settings, Bell } from "lucide-react";
-import { getRestaurantOrders, updateOrderStatus } from "@/api/restaurantApi";
+import { getRestaurantOrders, updateOrderStatus, getRestaurantOrderItems } from "@/api/restaurantApi";
 
 type OrderStatus = "ordered" | "processing" | "delivery" | "done";
 
 interface OrderItem {
+  food_id?: string;
   food_name: string;
   quantity: number;
-  price: number;
+  price?: number;
+  total_harga_food?: number;
 }
 
 interface Order {
@@ -82,17 +84,31 @@ export default function RestaurantDashboard() {
     try {
       const res = await getRestaurantOrders(restaurant.restaurant_id);
       if (res.success && res.data) {
-        // Normalize status to known type, default to "ordered"
+        // Normalize headers first
         const normalized: Order[] = res.data.map((o: any) => ({
           order_id: String(o.order_id),
-          items: o.items || [],
+          items: [],
           total_price: Number(o.total_price ?? o.order_amount ?? o.total ?? 0),
           status: STATUS_MAP[o.status ?? o.order_status] ?? "ordered",
           created_at: (o.created_at || o.order_date)
             ? new Date(o.created_at || o.order_date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
             : "--:--",
         }));
-        setOrders(normalized);
+
+        // Fetch items for all orders in parallel
+        const itemResults = await Promise.allSettled(
+          normalized.map((o) => getRestaurantOrderItems(o.order_id))
+        );
+
+        const withItems: Order[] = normalized.map((order, i) => {
+          const result = itemResults[i];
+          if (result.status === "fulfilled" && result.value?.success) {
+            return { ...order, items: result.value.data ?? [] };
+          }
+          return order;
+        });
+
+        setOrders(withItems);
       }
     } catch (err) {
       console.error("Failed to fetch orders:", err);

@@ -5,8 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Package, Utensils, BarChart2, Settings, Plus, Search, Minus, Heart } from "lucide-react";
+import { Package, Utensils, BarChart2, Settings, Plus, Search, Minus, Heart, Star, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 import { getFoodsByRestaurant, createFood, updateFoodStock } from "@/api/foodApi";
+import { getRestaurantFoodReviews } from "@/api/reviewApi";
 
 interface Food {
   food_id: string;
@@ -17,6 +18,13 @@ interface Food {
   description: string;
   total_likes: number;
   stok: number;
+}
+
+interface Review {
+  review_id?: string;
+  rating: number;
+  review: string;
+  display_name: string;
 }
 
 const EMPTY_FORM = {
@@ -43,6 +51,32 @@ export default function RestaurantFoodManagement() {
   const [stockLoading, setStockLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [expandedFood, setExpandedFood] = useState<string | null>(null);
+  const [reviewsMap, setReviewsMap] = useState<Record<string, Review[]>>({});
+  const [reviewsLoading, setReviewsLoading] = useState<string | null>(null);
+
+  const toggleReviews = async (food_id: string) => {
+    if (expandedFood === food_id) { setExpandedFood(null); return; }
+    setExpandedFood(food_id);
+    if (reviewsMap[food_id] !== undefined) return; // already loaded
+    setReviewsLoading(food_id);
+    try {
+      const res = await getRestaurantFoodReviews(food_id);
+      setReviewsMap(prev => ({ ...prev, [food_id]: res.success ? (res.data ?? []) : [] }));
+    } catch {
+      setReviewsMap(prev => ({ ...prev, [food_id]: [] }));
+    } finally {
+      setReviewsLoading(null);
+    }
+  };
+
+  const StarRow = ({ rating }: { rating: number }) => (
+    <div className="flex gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star key={i} className={`w-3.5 h-3.5 ${i < Math.round(rating) ? 'text-yellow-400 fill-current' : 'text-gray-200'}`} />
+      ))}
+    </div>
+  );
 
   const showToast = (message: string, type: "success" | "error") => {
     setToast({ message, type });
@@ -262,6 +296,7 @@ export default function RestaurantFoodManagement() {
                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b">Price</th>
                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b">Likes</th>
                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b text-center">Stock</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b text-center">Reviews</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -276,7 +311,8 @@ export default function RestaurantFoodManagement() {
                       </td>
                     </tr>
                   ) : filteredFoods.map((food) => (
-                    <tr key={food.food_id} className="hover:bg-gray-50 transition-colors">
+                    <React.Fragment key={food.food_id}>
+                    <tr className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
                           {food.url_img ? (
@@ -326,7 +362,50 @@ export default function RestaurantFoodManagement() {
                           </button>
                         </div>
                       </td>
+                      {/* Reviews toggle */}
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => toggleReviews(food.food_id)}
+                          className="flex items-center gap-1 mx-auto text-xs font-bold text-gray-500 hover:text-[#C62828] transition-colors"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          {expandedFood === food.food_id
+                            ? <ChevronUp className="w-3.5 h-3.5" />
+                            : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
+                      </td>
                     </tr>
+                    {/* Expandable review panel */}
+                    {expandedFood === food.food_id && (
+                      <tr className="bg-gray-50">
+                        <td colSpan={6} className="px-8 py-5">
+                          {reviewsLoading === food.food_id ? (
+                            <p className="text-sm text-gray-400">Loading reviews...</p>
+                          ) : (reviewsMap[food.food_id] ?? []).length === 0 ? (
+                            <p className="text-sm text-gray-400 italic">No reviews yet for this item.</p>
+                          ) : (
+                            <div className="space-y-3">
+                              {(reviewsMap[food.food_id] ?? []).map((rv, i) => (
+                                <div key={i} className="flex gap-4 items-start bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                                  <div className="w-8 h-8 rounded-full bg-[#C62828] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                    {rv.display_name?.[0]?.toUpperCase() ?? "?"}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-3 mb-1">
+                                      <span className="font-bold text-sm text-[#1C1C1C]">{rv.display_name}</span>
+                                      <StarRow rating={rv.rating} />
+                                      <span className="text-xs font-bold text-yellow-500">{rv.rating}/5</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600">{rv.review || <em className="text-gray-400">No comment.</em>}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
