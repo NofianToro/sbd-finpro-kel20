@@ -1,8 +1,13 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { FaTwitter, FaInstagram } from "react-icons/fa";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {loginUser} from "../../api/userApi";
 
-export default function Register() {
+export default function Login() {
   return (
     <div className="min-h-screen flex flex-col font-sans">
       {/* Navbar */}
@@ -14,7 +19,7 @@ export default function Register() {
           <Link href="/explore" className="hover:text-gray-300">Explore</Link>
           <Link href="/favorites" className="hover:text-gray-300">Favorites</Link>
           <Link href="/orders" className="hover:text-gray-300">Orders</Link>
-          <Link href="/register" className="hover:text-gray-300">Log In</Link>
+          <Link href="/register" className="hover:text-gray-300">Register</Link>
         </div>
       </nav>
 
@@ -63,30 +68,10 @@ export default function Register() {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Display Name</label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-400 rounded-md p-2 text-black focus:outline-none focus:border-red-600"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Phone Number</label>
-                <div className="flex">
-                  <span className="inline-flex items-center px-3 border border-r-0 border-gray-400 rounded-l-md bg-gray-50 text-gray-600 text-sm">
-                    +62
-                  </span>
-                  <input
-                    type="tel"
-                    className="flex-1 w-full border border-gray-400 rounded-r-md p-2 text-black focus:outline-none focus:border-red-600"
-                  />
-                </div>
-              </div>
 
               <div className="pt-2">
-                <Link href="/login" className="text-xs text-[#0099FF] hover:underline">
-                  Already have an account? Login here
+                <Link href="/register" className="text-xs text-[#0099FF] hover:underline">
+                  Do not have an account? Register here
                 </Link>
               </div>
 
@@ -95,7 +80,7 @@ export default function Register() {
                   type="submit"
                   className="bg-[#C1272D] text-white px-12 py-2 text-sm rounded-md hover:bg-red-800 transition-colors"
                 >
-                  Register
+                  Login
                 </button>
               </div>
             </form>
