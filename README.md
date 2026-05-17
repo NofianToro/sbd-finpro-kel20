@@ -4,6 +4,7 @@ The system consists of two main roles:
 * **User** → Discover foods, add favorites, checkout orders, and track deliveries.
 * **Restaurant Partner** → Manage menus, update stock, process orders, and monitor restaurant performance.
 KoiBite focuses on creating a more personalized and engaging food ordering experience compared to traditional food delivery platforms.
+<img width="359" height="159" alt="image" src="https://github.com/user-attachments/assets/ce30e111-06c1-4d8d-872c-77946c8adc95" />
 
 ---
 
