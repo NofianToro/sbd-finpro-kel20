@@ -6,8 +6,34 @@ import { FaTwitter, FaInstagram } from "react-icons/fa";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {loginUser} from "../../api/userApi";
+import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 export default function Login() {
+    const router = useRouter();
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setLoading(true);
+      setError("");
+      try {
+        const response = await loginUser({username, password});
+        localStorage.setItem(
+            "token", response.data.token
+        );
+        localStorage.setItem(
+            "role", "user"
+        );
+        router.push("homepage");
+      } catch (error) {
+        setError("Login failed");
+      } finally{
+        setLoading(true);
+      }
+    };
   return (
     <div className="min-h-screen flex flex-col font-sans">
       {/* Navbar */}
@@ -51,11 +77,13 @@ export default function Login() {
               <p className="text-sm text-gray-500">(いらっしゃいませ)</p>
             </div>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleLogin}>
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Username</label>
                 <input
                   type="text"
+                  value={username}
+                  onChange={(e) =>setUsername(e.target.value)}
                   className="w-full border border-gray-400 rounded-md p-2 text-black focus:outline-none focus:border-red-600"
                 />
               </div>
@@ -64,6 +92,8 @@ export default function Login() {
                 <label className="block text-xs text-gray-600 mb-1">Password</label>
                 <input
                   type="password"
+                  value={password}
+                  onChange={(e) =>setPassword(e.target.value)}
                   className="w-full border border-gray-400 rounded-md p-2 text-black focus:outline-none focus:border-red-600"
                 />
               </div>
@@ -80,7 +110,7 @@ export default function Login() {
                   type="submit"
                   className="bg-[#C1272D] text-white px-12 py-2 text-sm rounded-md hover:bg-red-800 transition-colors"
                 >
-                  Login
+                  {loading? "Loading..." : "login"}
                 </button>
               </div>
             </form>
