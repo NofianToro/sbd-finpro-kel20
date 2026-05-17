@@ -23,8 +23,11 @@ const authLimiter = rateLimit({
     }
 });
 
-const corsOptions ={
-    origin: "http://localhost:3000",
+const corsOptions = {
+    origin: [
+        "http://localhost:3000",
+        process.env.FRONTEND_URL,           // set this in Railway backend vars
+    ].filter(Boolean),
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
 };
