@@ -65,7 +65,15 @@ export default function RestaurantStatistics() {
         getRestaurantOrders(restaurant.restaurant_id),
         getFoodsByRestaurant(restaurant.restaurant_id),
       ]);
-      if (ordersRes.success && ordersRes.data) setOrders(ordersRes.data);
+      if (ordersRes.success && ordersRes.data) {
+        const normalized = ordersRes.data.map((o: any) => ({
+          ...o,
+          total_price: o.total_price ?? o.order_amount ?? 0,
+          status: o.status ?? o.order_status ?? 'ordered',
+          created_at: o.created_at || o.order_date || null,
+        }));
+        setOrders(normalized);
+      }
       if (foodsRes.success && foodsRes.data) setFoods(foodsRes.data);
     } catch (err) {
       console.error("Failed to fetch stats:", err);

@@ -47,7 +47,7 @@ export const updateOrderStatus = async (order_id, status) => {
     const token = localStorage.getItem('restaurant_token');
     const response = await api.put(
         `/restaurants/orders/${order_id}/status`,
-        { status },
+        { order_status: status },
         restaurantApi(token)
     );
     return response.data;

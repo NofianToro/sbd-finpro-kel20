@@ -86,10 +86,10 @@ export default function RestaurantDashboard() {
         const normalized: Order[] = res.data.map((o: any) => ({
           order_id: String(o.order_id),
           items: o.items || [],
-          total_price: Number(o.total_price ?? o.total ?? 0),
-          status: STATUS_MAP[o.status] ?? "ordered",
-          created_at: o.created_at
-            ? new Date(o.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+          total_price: Number(o.total_price ?? o.order_amount ?? o.total ?? 0),
+          status: STATUS_MAP[o.status ?? o.order_status] ?? "ordered",
+          created_at: (o.created_at || o.order_date)
+            ? new Date(o.created_at || o.order_date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
             : "--:--",
         }));
         setOrders(normalized);
