@@ -120,9 +120,9 @@ const userController = {
         }
     },
 
-    getOrderByOrderId: async (req, res) => {
+    getUserByUserId: async (req, res) => {
         try {
-            const { order_id } = req.params;
+            const { user_id } = req.params;
 
             const user = await userRepo.getUserById(user_id);
 
@@ -139,6 +139,43 @@ const userController = {
             });
         }
     },
+    getProfile: async (req, res) => {
+        try {
+            const user_id = req.user.user_id; 
+            const user = await userRepo.getUserById(user_id);
+
+            res.status(200).json({
+                success: true,
+                message: "Successfully retrieved profile",
+                data: user,
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                data: error.message,
+            });
+        }
+    },
+    userTopUpSaldo: async (req, res) => {
+        try {
+            const { user_id , saldo} = req.body;
+
+            const result  = await userRepo.updateSaldo(user_id, saldo);
+
+            res.status(200).json({
+                success: true,
+                message: "Successfully update saldo",
+                data: result,
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                data: error.message,
+            });
+        }
+    }
 };
 
 module.exports = userController;

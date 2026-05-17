@@ -36,6 +36,45 @@ const orderDetailRepository = {
             throw error;
         }
     },
+    updateOrderItemQuantity: async (order_detail_id, quantity, total_harga_food) => {
+        const query = `
+            UPDATE order_detail
+            SET
+                quantity = $1,
+                total_harga_food = $2
+            WHERE order_detail_id = $3
+            RETURNING *;
+        `;
+        try {
+            const result =
+                await db.query(
+                    query,
+                    [
+                        quantity,
+                        total_harga_food,
+                        order_detail_id
+                    ]
+                );
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    deleteOrderItem: async (order_detail_id) => {
+        const query = `
+            DELETE FROM order_detail
+            WHERE order_detail_id = $1
+            RETURNING *;
+        `;
+        try {
+            const result =
+                await db.query(query, [order_detail_id]);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
 };
 
 module.exports = orderDetailRepository;

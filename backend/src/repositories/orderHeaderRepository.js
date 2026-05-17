@@ -54,7 +54,7 @@ const orderHeaderRepository = {
 
         try {
             const result = await db.query(query, [user_id]);
-            return result.rows[0];
+            return result.rows;
         } catch (error) {
             throw error;
         }
@@ -64,11 +64,29 @@ const orderHeaderRepository = {
 
         try {
             const result = await db.query(query, [restaurant_id]);
-            return result.rows[0];
+            return result.rows;
         } catch (error) {
             throw error;
         }
     },
+    updateOrderStatus: async (order_id, order_status) => {
+        const query = `
+            UPDATE order_header
+            SET order_status = $1
+            WHERE order_id = $2
+            RETURNING *;
+        `;
+        try {
+            const result =
+                await db.query(
+                    query,
+                    [order_status, order_id]
+                );
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
 };
 
 module.exports = orderHeaderRepository;

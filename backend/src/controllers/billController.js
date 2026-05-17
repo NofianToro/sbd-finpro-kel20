@@ -56,6 +56,32 @@ const billController = {
             });
         }
     },
+    updateBill: async (req, res) => {
+        try {
+            const { order_id } = req.params;
+            const {
+                total_amount,
+                platform_fee
+            } = req.body;
+            const updated =
+                await billRepo.updateBill(
+                    order_id,
+                    total_amount,
+                    platform_fee
+                );
+            res.status(200).json({
+                success: true,
+                message: 'Successfully updated bill',
+                data: updated
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: error.message,
+                data: null
+            });
+        }
+    }
 };
 
 module.exports = billController;

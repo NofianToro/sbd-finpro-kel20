@@ -43,13 +43,6 @@ const ratingReviewController = {
         try {
             const { food_id }  = req.params;
             const rating = await ratingReviewRepo.getReviewByFoodId(food_id);
-            if (!restaurant) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Rating not found',
-                    data: null,
-                });
-            }
             res.status(200).json({
                 success: true,
                 message: `Successfully retrieve rating`,

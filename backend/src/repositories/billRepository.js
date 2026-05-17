@@ -35,6 +35,27 @@ const billRepository = {
         } catch (error) {
             throw error;
         }
+    },
+    updateBill: async (
+        order_id,
+        total_amount,
+        platform_fee
+    ) => {
+        const query = `
+            UPDATE bills
+            SET
+                total_amount = $1,
+                platform_fee = $2
+            WHERE order_id = $3
+            RETURNING *;
+        `;
+        try {
+            const result =
+                await db.query(query,[total_amount, platform_fee, order_id]);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
     }
 };
 

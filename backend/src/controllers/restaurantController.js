@@ -1,6 +1,10 @@
 const { Result } = require('pg');
 const restoRepo = require('../repositories/restaurantRepository');
 
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const saltRounds = 10;
+
 const restaurantController = {
     getAllRestaurant: async (req, res) => {
         try {

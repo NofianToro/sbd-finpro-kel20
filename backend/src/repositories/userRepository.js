@@ -50,7 +50,7 @@ const userRepository = {
   updateSaldo: async (user_id, saldo) => {
     const query = `
             UPDATE master_user
-            SET saldo = $1
+            SET saldo = saldo+$1
             WHERE user_id = $2
             RETURNING *;
         `;
@@ -62,6 +62,20 @@ const userRepository = {
       throw error;
     }
   },
+  updateUserProfileImage: async (user_id, newUrlImg) => {
+        const query = `
+            UPDATE master_user
+            SET url_profile = $1
+            WHERE user_id = $2
+            RETURNING user_id, display_name, url_profile;
+        `;
+        try {
+            const result = await db.query(query, [newUrlImg, user_id]);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
+    },
 };
 
 module.exports = userRepository;

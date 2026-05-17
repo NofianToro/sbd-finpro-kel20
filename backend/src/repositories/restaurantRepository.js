@@ -18,7 +18,7 @@ const restaurantRepository = {
         }
     },
 
-    getrestaurantByUsername: async (username) => {
+    getRestaurantByUsername: async (username) => {
         const query = `SELECT * FROM master_restaurant WHERE username = $1;`;
         try {
             const result = await db.query(query, [username]);

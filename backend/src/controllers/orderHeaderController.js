@@ -66,8 +66,8 @@ const orderHeaderController = {
 
             res.status(200).json({
                 success: true,
-                message: "Successfully retrieved order header",
-                data: user,
+                message: "Successfully retrieved order",
+                data: order,
             });
         } catch (error) {
             res.status(500).json({
@@ -84,8 +84,8 @@ const orderHeaderController = {
 
             res.status(200).json({
                 success: true,
-                message: "Successfully retrieved order header",
-                data: user,
+                message: "Successfully retrieved user orders",
+                data: order,
             });
         } catch (error) {
             res.status(500).json({
@@ -98,12 +98,12 @@ const orderHeaderController = {
     getOrderHeaderByRestaurantId: async (req, res) => {
         try {
             const { restaurant_id } = req.params;
-            const order = await orderHeaderRepo.getOrderHeaderById(restaurant_id);
+            const order = await orderHeaderRepo.getOrderHeaderByRestaurantId(restaurant_id);
 
             res.status(200).json({
                 success: true,
                 message: "Successfully retrieved order header",
-                data: user,
+                data: order,
             });
         } catch (error) {
             res.status(500).json({
@@ -113,6 +113,28 @@ const orderHeaderController = {
             });
         }
     },
+    updateOrderStatus: async (req, res) => {
+        try {
+            const { order_id } = req.params;
+            const { order_status } = req.body;
+            const updated =
+                await orderHeaderRepo.updateOrderStatus(
+                    order_id,
+                    order_status
+                );
+            res.status(200).json({
+                success: true,
+                message: "Successfully updated order status",
+                data: updated,
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: error.message,
+                data: null,
+            });
+        }
+    }
 };
 
 module.exports = orderHeaderController;

@@ -1,5 +1,5 @@
 const { Pool } = require("pg");
-require("dotenv").config();
+require("dotenv").config({ path: '.env.new' });
 
 const pool = new Pool({
   connectionString: process.env.PG_CONNECTION_STRING,
@@ -8,14 +8,19 @@ const pool = new Pool({
   },
 });
 
-const connectDB = async () => {
+const connect = async () => {
   try {
-    await pool.connect();
+    const client = await pool.connect();
     console.log("Connected to PostgreSQL database at Neon");
+    client.release();
   } catch (err) {
     console.error(err);
+    throw err;
   }
 };
 
-connectDB();
-module.exports = pool;
+const query = async(text, params) =>{
+  return await pool.query(text, params);
+};
+
+module.exports = {connect, query, pool,};

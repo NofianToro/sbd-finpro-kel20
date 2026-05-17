@@ -19,9 +19,9 @@ const foodRepository ={
         }
     },
     getFoodbyName: async (food_name) => { // this is not exclusive to one food, prob need to add regex later
-         const query = `SELECT * FROM food WHERE food_name = $1;`;
+         const query = `SELECT * FROM food WHERE food_name ILIKE $1;`;
         try {
-            const result = await db.query(query, [food_name]);
+            const result = await db.query(query, [`%${food_name}%`]);
             return result.rows;
         } catch (error) {
             throw error;
@@ -77,6 +77,62 @@ const foodRepository ={
             throw error;
         }
     },
+    updateFood: async (params) => {
+        const {
+            food_name,
+            url_img,
+            url_video,
+            price,
+            category,
+            description,
+            stok
+        } = foodData;
+
+        const query = `
+            UPDATE food
+            SET
+                food_name = $1,
+                url_img = $2,
+                url_video = $3,
+                price = $4,
+                category = $5,
+                description = $6,
+                stok = $7
+            WHERE food_id = $8
+            RETURNING *;
+        `;
+
+        const values = [
+            food_name,
+            url_img,
+            url_video,
+            price,
+            category,
+            description,
+            stok,
+            food_id
+        ];
+
+        try {
+            const result = await db.query(query, values);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
+    },
+    deleteFood: async (food_id) => {
+        const query = `
+            DELETE FROM food
+            WHERE food_id = $1
+            RETURNING *;
+        `;
+        try {
+            const result = await db.query(query, [food_id]);
+            return result.rows[0];
+        } catch (error) {
+            throw error;
+        }
+    }
 };
 
 module.exports = foodRepository;
