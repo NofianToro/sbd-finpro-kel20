@@ -46,6 +46,8 @@ router.get('/orders/:order_id', authenticateToken, authorizeRoles('user'), order
 // get order item
 router.get('/orders/:order_id/items', authenticateToken,authorizeRoles('user'), orderDetailController.getOrderDetailByOrderId);
 
+// create bill when checkout
+router.post('/orders/:order_id/bill', authenticateToken, authorizeRoles('user'), billController.createBill);
 // get bill
 router.get('/orders/:order_id/bill', authenticateToken,authorizeRoles('user'), billController.getBillByOrderId);
 

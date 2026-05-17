@@ -3,8 +3,8 @@ const billRepo = require('../repositories/billRepository');
 const billController = {
 
     createBill: async (req, res) => {
+        const { order_id } = req.params;
         const {
-            order_id,
             total_amount,
             platform_fee
         } = req.body;

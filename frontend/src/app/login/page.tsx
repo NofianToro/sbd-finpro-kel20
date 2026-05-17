@@ -27,6 +27,7 @@ export default function Login() {
         localStorage.setItem(
             "role", "user"
         );
+        localStorage.setItem("user_id", response.data.user.user_id);
         router.push("homepage");
       } catch (error) {
         setError("Login failed");

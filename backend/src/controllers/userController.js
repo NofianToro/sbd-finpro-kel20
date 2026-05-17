@@ -159,9 +159,11 @@ const userController = {
     },
     userTopUpSaldo: async (req, res) => {
         try {
-            const { user_id , saldo} = req.body;
+            const { user_id } = req.params;
+            const { saldo } = req.body;
+            const saldoAmount = Number(saldo);
 
-            const result  = await userRepo.updateSaldo(user_id, saldo);
+            const result  = await userRepo.updateSaldo(user_id, saldoAmount);
 
             res.status(200).json({
                 success: true,

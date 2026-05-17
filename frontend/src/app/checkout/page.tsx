@@ -1,48 +1,119 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaShoppingCart, FaUser, FaTwitter, FaInstagram, FaMapMarkerAlt, FaCreditCard, FaCheckCircle, FaSpinner } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import {getUserProfile, topUpSaldo} from "../../api/userApi";
+import {createOrder} from "../../api/orderApi";
+import {addOrderItem} from "../../api/orderApi";
+import {createBill} from "../../api/billApi";
+import {updateFoodStock} from "../../api/foodApi";
+import { useRouter } from "next/navigation";
 
-// --- MOCK DATA ---
-const MOCK_USER = {
-  balance: 1500000, // Raised balance to cover demo cart costs
-  profile_name: "Michael",
-};
 
-const MOCK_CART = [
-  {
-    food_id: "1",
-    food_name: "Premium Truffle Salmon Roll",
-    price: 85000,
-    quantity: 2,
-    url_img: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=150&auto=format&fit=crop",
-  },
-  {
-    food_id: "2",
-    food_name: "Spicy Tonkotsu Ramen",
-    price: 45000,
-    quantity: 1,
-    url_img: "https://images.unsplash.com/photo-1552611052-33e04de081de?q=80&w=150&auto=format&fit=crop",
-  }
-];
-
+// will do
+// create order header
+// create order detail
+// create bill
+// deduct saldo
+// redirect tracking
 export default function CheckoutPage() {
+  const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [location, setLocation] = useState("");
+  const [note, setNote] = useState("");
 
-  const subtotal = MOCK_CART.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = cartItems.reduce((acc, item) => acc + Number(item.price) * item.quantity, 0);
   const platformFee = 2000;
   const totalAmount = subtotal + platformFee;
+  
+  // load cart + user
+  useEffect(()=>{
+    fetchProfile();
 
-  const handlePayment = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsSuccess(true);
-    }, 2000);
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      setCartItems(JSON.parse(savedCart));
+    }
+  }, []);
+
+  const fetchProfile = async () => {
+      try {
+        const userId = localStorage.getItem("user_id");
+        if(!userId) return; 
+        const response = await getUserProfile(userId);
+        setUserProfile(response.data);
+      } catch (error){
+        console.error("Failed to fetch profile", error);
+      }
+    };
+
+  const handlePayment = async () => {
+      try {
+        
+        setIsProcessing(true);  
+        if(cartItems.length === 0) return;
+        if(Number(userProfile?.saldo) < totalAmount){
+          alert("Insufficient balance");
+          setIsProcessing(false);
+          return;
+        }
+        const restaurantId = cartItems[0].restaurant_id;
+
+        // create order header
+        const orderResponse = await createOrder({
+          user_id: userProfile.user_id,
+          restaurant_id: restaurantId,
+          order_amount: totalAmount,
+          order_status: "waiting",
+          location
+        });
+
+        console.log(orderResponse);
+
+        const orderId = orderResponse.data.order_id;
+
+        //create order detail
+        for(const item of cartItems){
+          await addOrderItem({
+            order_id:orderId,
+            food_id: item.food_id,
+            quantity: item.quantity,
+            total_harga_food: Number(item.price) * item.quantity
+          });
+        }
+        // create bill
+        await createBill(
+          orderId,
+          {
+            total_amount: totalAmount,
+            platform_fee: platformFee
+          }
+        );
+        // ini harusnya ga top up, tapi diganti negatif untuk sementara to deduce saldo
+        await topUpSaldo(
+          userProfile.user_id,
+          -totalAmount
+        );
+
+        setIsSuccess(true);
+        localStorage.removeItem("cart");
+        setCartItems([]);
+
+        setTimeout(()=>{
+          router.push('/tracking');
+        }, 2000);
+
+      } catch (error) {
+        console.error(error);
+      } finally{
+        setIsProcessing(false);
+      }
   };
 
   return (
@@ -59,16 +130,20 @@ export default function CheckoutPage() {
           <Link href="/orders" className="hover:text-gray-300">Orders</Link>
         </div>
         <div className="flex items-center space-x-6 text-lg">
-          <span className="text-sm font-medium">Balance: Rp {MOCK_USER.balance.toLocaleString("id-ID")}</span>
+          <span className="text-sm font-medium">Balance: Rp {
+            Number(userProfile?.saldo || 0)
+            .toLocaleString("id-ID")
+          }
+          </span>
           <div className="relative cursor-pointer">
             <FaShoppingCart className="text-2xl" />
             <div className="absolute -top-2 -right-2 bg-[#C1272D] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
-              {MOCK_CART.reduce((acc, item) => acc + item.quantity, 0)}
+              {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <FaUser className="text-xl" />
-            <span>{MOCK_USER.profile_name}</span>
+            <span>{userProfile?.display_name || "Guest"}</span>
           </div>
         </div>
       </header>
@@ -94,13 +169,17 @@ export default function CheckoutPage() {
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Delivery Location</label>
                 <input 
                   type="text" 
-                  defaultValue="Apartemen SCBD, Tower A, Lantai 14 No. 42"
+                  placeholder="Enter delivery address"
+                  value={location}
+                  onChange={(e) =>setLocation(e.target.value)}
                   className="w-full h-[48px] px-4 border border-gray-300 rounded-lg focus:outline-none focus:border-[#C62828]"
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Note to Chef / Driver (Optional)</label>
-                <textarea 
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)} 
                   placeholder="e.g., Please make the ramen extra spicy..."
                   className="w-full h-[80px] p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-[#C62828] resize-none"
                 ></textarea>
@@ -118,7 +197,7 @@ export default function CheckoutPage() {
                 <div className="col-span-4 text-right">Subtotal</div>
               </div>
               <div className="flex flex-col gap-4">
-                {MOCK_CART.map(item => (
+                {cartItems.map(item => (
                   <div key={item.food_id} className="grid grid-cols-12 items-center">
                     <div className="col-span-6 flex items-center gap-3">
                       <div className="w-12 h-12 rounded-md overflow-hidden bg-gray-200 shrink-0">
@@ -129,7 +208,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="col-span-2 text-center font-medium">x{item.quantity}</div>
                     <div className="col-span-4 text-right font-semibold text-[#1C1C1C]">
-                      Rp {(item.price * item.quantity).toLocaleString("id-ID")}
+                      Rp {(Number(item.price) * item.quantity).toLocaleString("id-ID")}
                     </div>
                   </div>
                 ))}
@@ -148,7 +227,7 @@ export default function CheckoutPage() {
                   <FaCheckCircle className="text-xl" />
                 </div>
                 <h3 className="font-bold text-[#1C1C1C] mb-1">KoiBite Balance</h3>
-                <p className="text-sm font-medium text-[#C62828]">Rp {MOCK_USER.balance.toLocaleString("id-ID")}</p>
+                <p className="text-sm font-medium text-[#C62828]">Rp {Number(userProfile?.saldo).toLocaleString("id-ID") || 0}</p>
               </div>
               <div className="border border-gray-200 bg-white hover:border-[#C62828] transition-colors rounded-xl p-4 cursor-pointer">
                 <h3 className="font-bold text-[#1C1C1C] mb-1">Credit / Debit Card</h3>

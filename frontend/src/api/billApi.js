@@ -13,7 +13,7 @@ export const getBillByOrderId = async (order_id) => {
 // restaurant side
 export const createBill = async (order_id, billData) => {
     const response = await api.post(
-        `/restaurants/orders/${order_id}/bill`,
+        `/users/orders/${order_id}/bill`,
         billData
     );
 

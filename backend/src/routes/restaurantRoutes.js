@@ -47,8 +47,7 @@ router.put("/orders/:order_id/status",authenticateToken, authorizeRoles("restaur
 
 // get bill
 router.get('/orders/:order_id/bill', authenticateToken,authorizeRoles('restaurant'), billController.getBillByOrderId );
-// create bill
-router.post('/orders/:order_id/bill', authenticateToken,authorizeRoles('restaurant'), billController.createBill);
+
 //update bill
 router.put('/orders/:order_id/bill',authenticateToken, authorizeRoles('restaurant'), billController.updateBill);
 // get review for specific food

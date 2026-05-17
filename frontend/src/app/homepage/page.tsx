@@ -7,67 +7,26 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch, FaPlus, FaTimes, FaHeart, FaTrash, FaShoppingCart, FaUser, FaTwitter, FaInstagram } from "react-icons/fa";
 import {getAllFoods} from "../../api/foodApi";
 import {getUserProfile} from "../../api/userApi";
-
-// --- MOCK DATA ---
-const MOCK_FOODS = [
-  {
-    food_id: "1",
-    food_name: "Truffle Salmon Roll",
-    url_img: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800&auto=format&fit=crop",
-    price: 55000,
-    category: "Sushi",
-    description: "Premium salmon wrapped in nori and seasoned sushi rice, topped with special truffle mayo and lightly torched for a perfect smoky flavor.",
-    total_likes: 2400,
-    stok: 12
-  },
-  {
-    food_id: "2",
-    food_name: "Spicy Tonkotsu Ramen",
-    url_img: "https://images.unsplash.com/photo-1552611052-33e04de081de?q=80&w=800&auto=format&fit=crop",
-    price: 45000,
-    category: "Ramen",
-    description: "Rich pork bone broth with spicy chili oil, tender chashu slices, soft boiled egg, and bamboo shoots.",
-    total_likes: 3100,
-    stok: 8
-  },
-  {
-    food_id: "3",
-    food_name: "Wagyu Beef Bento",
-    url_img: "https://images.unsplash.com/photo-1580959375944-cbbccb5cba07?q=80&w=800&auto=format&fit=crop",
-    price: 85000,
-    category: "Bento",
-    description: "A5 Wagyu beef slices grilled to perfection with teriyaki glaze, served with Japanese rice and tempura.",
-    total_likes: 1850,
-    stok: 5
-  },
-  {
-    food_id: "4",
-    food_name: "Matcha Mochi Dessert",
-    url_img: "https://images.unsplash.com/photo-1515037893149-de7f840978e2?q=80&w=800&auto=format&fit=crop",
-    price: 20000,
-    category: "Dessert",
-    description: "Soft and chewy mochi filled with premium Uji matcha cream and red bean paste.",
-    total_likes: 4200,
-    stok: 20
-  },
-  {
-    food_id: "5",
-    food_name: "Ebi Tempura Udong",
-    url_img: "https://images.unsplash.com/photo-1617093727343-374698b1b08d?q=80&w=800&auto=format&fit=crop",
-    price: 40000,
-    category: "Noodles",
-    description: "Thick udon noodles in a clear dashi broth, topped with crispy jumbo shrimp tempura.",
-    total_likes: 1560,
-    stok: 15
-  }
-];
+import { useRouter }from "next/navigation";
 
 export default function Homepage() {
+  const router = useRouter();
   const [foods, setFoods] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
   const [matchedItems, setMatchedItems] = useState<any[]>([]);
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState<any[]>(()=>{
+    if(typeof window === "undefined") return [];
+    try {
+      const savedCart = localStorage.getItem("cart");
+      if(!savedCart) return [];
+      return JSON.parse(savedCart);
+    } catch (error) {
+      localStorage.removeItem("cart");
+      return[];
+    }
+  });
+
   
   const [userProfile, setUserProfile] = useState<any>(null);
   //const userBalance = 150000;
@@ -76,6 +35,9 @@ export default function Homepage() {
     fetchFood();
     fetchProfile();
   }, []);
+  useEffect(()=>{
+    localStorage.setItem("cart", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   const fetchFood = async () => {
     try {
@@ -87,7 +49,9 @@ export default function Homepage() {
   };
   const fetchProfile = async () => {
     try {
-      const response = await getUserProfile();
+      const userId = localStorage.getItem("user_id");
+      if(!userId) return; 
+      const response = await getUserProfile(userId);
       setUserProfile(response.data);
     } catch (error){
       console.error("Failed to fetch profile", error);
@@ -262,7 +226,7 @@ export default function Homepage() {
         {/* 3. CENTER COLUMN: The Swipe Arena */}
         <section className="flex-1 flex flex-col items-center justify-center relative bg-transparent overflow-hidden">
           <AnimatePresence custom={swipeDirection} mode="wait">
-            {currentIndex < foods.length && foods.length > 0 ? (
+            {foods.length > 0 && currentIndex < foods.length  ? (
               <motion.div
                 key={currentIndex}
                 custom={swipeDirection}
@@ -288,7 +252,7 @@ export default function Homepage() {
                 <div className="p-6 flex flex-col">
                   <div className="flex justify-between items-start mb-2">
                     <h2 className="text-2xl font-bold text-[#1C1C1C]">{foods[currentIndex].food_name}</h2>
-                    <span className="text-xl font-bold text-[#C62828]">Rp {foods[currentIndex].price.toLocaleString("id-ID")}</span>
+                    <span className="text-xl font-bold text-[#C62828]">Rp {Number(foods[currentIndex].price).toLocaleString("id-ID")}</span>
                   </div>
                   <p className="text-sm text-gray-500 mb-5 leading-relaxed line-clamp-2">
                     {foods[currentIndex].description}
@@ -406,6 +370,7 @@ export default function Homepage() {
             {/* Checkout Button */}
             <button 
               disabled={cartItems.length === 0}
+              onClick={()=>router.push("/checkout")}
               className="w-full h-[56px] bg-[#4CAF50] disabled:bg-gray-300 disabled:text-gray-500 text-white rounded-xl font-bold text-lg hover:bg-[#3d8c40] disabled:hover:bg-gray-300 transition-colors shadow-md flex justify-center items-center"
             >
               Checkout
