@@ -18,7 +18,7 @@ router.post('/register', userRegistrationValidation, validate, userController.cr
 router.post('/login', userController.loginUser);
 
 // user profile
-router.get('/profile', userController.getProfile);
+router.get('/profile/:user_id', authenticateToken, authorizeRoles("user") ,userController.getProfile);
 router.get('/getAll', userController.getAllUser);
 
 

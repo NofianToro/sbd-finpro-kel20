@@ -17,6 +17,15 @@ const userRepository = {
       throw error;
     }
   },
+  getUserById: async (user_id) => {
+     const query = `SELECT * FROM master_user WHERE user_id = $1;`;
+    try {
+      const result = await db.query(query, [user_id]);
+      return result.rows[0];
+    } catch (error) {
+      throw error;
+    }
+  },
 
   getUserByUsername: async (username) => {
     const query = `SELECT * FROM master_user WHERE username = $1;`;

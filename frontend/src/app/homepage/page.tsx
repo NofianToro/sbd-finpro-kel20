@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch, FaPlus, FaTimes, FaHeart, FaTrash, FaShoppingCart, FaUser, FaTwitter, FaInstagram } from "react-icons/fa";
+import {getAllFoods} from "../../api/foodApi";
+import {getUserProfile} from "../../api/userApi";
 
 // --- MOCK DATA ---
 const MOCK_FOODS = [
@@ -61,14 +63,36 @@ const MOCK_FOODS = [
 ];
 
 export default function Homepage() {
-  const [foods, setFoods] = useState(MOCK_FOODS);
+  const [foods, setFoods] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
   const [matchedItems, setMatchedItems] = useState<any[]>([]);
   const [cartItems, setCartItems] = useState<any[]>([]);
   
-  const userBalance = 150000;
+  const [userProfile, setUserProfile] = useState<any>(null);
+  //const userBalance = 150000;
   const platformFee = 2000;
+  useEffect(() => {
+    fetchFood();
+    fetchProfile();
+  }, []);
+
+  const fetchFood = async () => {
+    try {
+      const response = await getAllFoods();
+      setFoods(response.data);
+    } catch (error) {
+      console.error("failed to fetch foods", error);
+    }
+  };
+  const fetchProfile = async () => {
+    try {
+      const response = await getUserProfile();
+      setUserProfile(response.data);
+    } catch (error){
+      console.error("Failed to fetch profile", error);
+    }
+  };
 
   // Handlers for Swiping
   const handleMatch = () => {
@@ -125,7 +149,7 @@ export default function Homepage() {
   };
 
   // Calculations
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
   const totalAmount = subtotal > 0 ? subtotal + platformFee : 0;
 
   // Framer Motion Variants
@@ -153,7 +177,9 @@ export default function Homepage() {
           <Link href="/orders" className="hover:text-gray-300">Orders</Link>
         </div>
         <div className="flex items-center space-x-6 text-lg">
-          <span className="text-sm font-medium">Balance: Rp {userBalance.toLocaleString("id-ID")}</span>
+          <span className="text-sm font-medium">
+            Balance: Rp {Number(userProfile?.saldo || 0).toLocaleString("id-ID")}
+          </span>
           <div className="relative cursor-pointer">
             <FaShoppingCart className="text-2xl" />
             {cartItems.length > 0 && (
@@ -164,7 +190,11 @@ export default function Homepage() {
           </div>
           <div className="flex items-center space-x-2">
             <FaUser className="text-xl" />
-            <span>My_Name</span>
+            <span>
+              {
+                userProfile?.display_name || "Guest"
+              }
+              </span>
           </div>
         </div>
       </header>
@@ -213,7 +243,7 @@ export default function Homepage() {
                       </div>
                       <div className="flex flex-col">
                         <span className="text-sm font-semibold text-[#1C1C1C] line-clamp-1 w-[130px]">{item.food_name}</span>
-                        <span className="text-xs font-bold text-[#C62828] mt-1">Rp {item.price.toLocaleString("id-ID")}</span>
+                        <span className="text-xs font-bold text-[#C62828] mt-1">Rp {Number(item.price).toLocaleString("id-ID")}</span>
                       </div>
                     </div>
                     <button 
@@ -232,7 +262,7 @@ export default function Homepage() {
         {/* 3. CENTER COLUMN: The Swipe Arena */}
         <section className="flex-1 flex flex-col items-center justify-center relative bg-transparent overflow-hidden">
           <AnimatePresence custom={swipeDirection} mode="wait">
-            {currentIndex < foods.length ? (
+            {currentIndex < foods.length && foods.length > 0 ? (
               <motion.div
                 key={currentIndex}
                 custom={swipeDirection}
@@ -337,7 +367,7 @@ export default function Homepage() {
                   >
                     <div className="flex justify-between items-start">
                       <span className="font-semibold text-sm text-[#1C1C1C] max-w-[200px] leading-tight flex-1">{item.food_name}</span>
-                      <span className="font-bold text-sm text-[#1C1C1C] ml-2 shrink-0">Rp {(item.price * item.quantity).toLocaleString("id-ID")}</span>
+                      <span className="font-bold text-sm text-[#1C1C1C] ml-2 shrink-0">Rp {(Number(item.price) * item.quantity).toLocaleString("id-ID")}</span>
                     </div>
                     <div className="flex justify-between items-center mt-1">
                       <button 

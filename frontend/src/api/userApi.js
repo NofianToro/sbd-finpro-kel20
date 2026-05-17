@@ -17,9 +17,9 @@ export const loginUser = async (userData) => {
     return response.data;
 };
 
-export const getUserProfile = async () => {
+export const getUserProfile = async (user_id) => {
     const response = await api.get(
-        '/users/profile'
+        `/users/profile/${user_id}`
     );
     return response.data;
 };
