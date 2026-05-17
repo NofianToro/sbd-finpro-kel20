@@ -105,6 +105,9 @@ export default function CheckoutPage() {
         localStorage.removeItem("cart");
         setCartItems([]);
 
+        // save for tracking
+        localStorage.setItem("current_order_id", orderId);
+
         setTimeout(()=>{
           router.push('/tracking');
         }, 2000);
