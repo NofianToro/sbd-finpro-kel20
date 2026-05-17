@@ -127,7 +127,7 @@ export default function CheckoutPage() {
         <div className="flex items-center">
           <Image src="/KoiBite_logo.png" alt="KoiBite Logo" width={120} height={40} className="object-contain" />
         </div>
-        <div className="flex space-x-8 text-l">
+        <div className="flex space-x-8 text-lg">
           <Link href="/explore" className="hover:text-gray-300">Explore</Link>
           <Link href="/favorites" className="hover:text-gray-300">Favorites</Link>
           <Link href="/orders" className="hover:text-gray-300">Orders</Link>
