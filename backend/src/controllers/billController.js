@@ -1,0 +1,87 @@
+const billRepo = require('../repositories/billRepository');
+
+const billController = {
+
+    createBill: async (req, res) => {
+        const { order_id } = req.params;
+        const {
+            total_amount,
+            platform_fee
+        } = req.body;
+
+        if (!order_id || !total_amount) {
+            return res.status(400).json({
+                success: false,
+                message: 'Required fields are missing',
+                data: null
+            });
+        }
+
+        try {
+            const bill = await billRepo.createBill({
+                order_id,
+                total_amount,
+                platform_fee
+            });
+
+            res.status(201).json({
+                success: true,
+                message: 'Successfully created bill',
+                data: bill
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Internal Server Error',
+                data: error.message
+            });
+        }
+    },
+    getBillByOrderId:async (req, res) => {
+        try {
+            const { order_id } = req.params;
+            const order = await billRepo.getBillByOrderId(order_id);
+
+            res.status(200).json({
+                success: true,
+                message: "Successfully retrieved bill",
+                data: order,
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+                data: error.message,
+            });
+        }
+    },
+    updateBill: async (req, res) => {
+        try {
+            const { order_id } = req.params;
+            const {
+                total_amount,
+                platform_fee
+            } = req.body;
+            const updated =
+                await billRepo.updateBill(
+                    order_id,
+                    total_amount,
+                    platform_fee
+                );
+            res.status(200).json({
+                success: true,
+                message: 'Successfully updated bill',
+                data: updated
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: error.message,
+                data: null
+            });
+        }
+    }
+};
+
+module.exports = billController;
