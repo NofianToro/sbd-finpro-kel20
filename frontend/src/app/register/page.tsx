@@ -1,8 +1,31 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { FaTwitter, FaInstagram } from "react-icons/fa";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {registerUser} from "../../api/userApi";
 
 export default function Register() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [display_name, setDisplayName] = useState("");
+  const [phone, setPhone] = useState("");
+  const router = useRouter();
+  const handleRegister = async(e: React.FormEvent<HTMLFormElement>)=>{
+    e.preventDefault();
+    try {
+      await registerUser({
+        username, password, display_name, phone, 
+        profile_url:"https://i.pinimg.com/1200x/ec/36/a4/ec36a4c88f8311afc807452c7c15f839.jpg" //placeholder pfp
+      });
+      alert("Register success");
+      router.push("/login");
+    } catch (error) {
+      console.error(error);
+      alert("Register failed");
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col font-sans">
       {/* Navbar */}
@@ -46,11 +69,13 @@ export default function Register() {
               <p className="text-sm text-gray-500">(いらっしゃいませ)</p>
             </div>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleRegister}>
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Username</label>
                 <input
                   type="text"
+                  value={username}
+                  onChange={(e)=>setUsername(e.target.value)}
                   className="w-full border border-gray-400 rounded-md p-2 text-black focus:outline-none focus:border-red-600"
                 />
               </div>
@@ -59,6 +84,8 @@ export default function Register() {
                 <label className="block text-xs text-gray-600 mb-1">Password</label>
                 <input
                   type="password"
+                  value={password}
+                  onChange={(e)=>setPassword(e.target.value)}
                   className="w-full border border-gray-400 rounded-md p-2 text-black focus:outline-none focus:border-red-600"
                 />
               </div>
@@ -67,19 +94,21 @@ export default function Register() {
                 <label className="block text-xs text-gray-600 mb-1">Display Name</label>
                 <input
                   type="text"
+                  value={display_name}
+                  onChange={(e)=>setDisplayName(e.target.value)}
                   className="w-full border border-gray-400 rounded-md p-2 text-black focus:outline-none focus:border-red-600"
                 />
               </div>
 
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Phone Number</label>
-                <div className="flex">
-                  <span className="inline-flex items-center px-3 border border-r-0 border-gray-400 rounded-l-md bg-gray-50 text-gray-600 text-sm">
-                    +62
-                  </span>
+                <div className="flex rounded-md">
+              
                   <input
                     type="tel"
-                    className="flex-1 w-full border border-gray-400 rounded-r-md p-2 text-black focus:outline-none focus:border-red-600"
+                    value={phone}
+                    onChange={(e)=>setPhone(e.target.value)}
+                    className="flex-1 w-full border border-gray-400 rounded-md p-2 text-black focus:outline-none focus:border-red-600"
                   />
                 </div>
               </div>
