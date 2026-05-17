@@ -12,16 +12,16 @@ export const createOrder = async (orderData) => {
 
 export const addOrderItem = async (itemData) => {
     const response = await api.post(
-        '/users/orders/items',
+        '/users/orders/detail',
         itemData
     );
 
     return response.data;
 };
 
-export const getMyOrders = async () => {
+export const getUserOrders = async (user_id) => {
     const response = await api.get(
-        '/users/orders'
+        `/users/orders/user/${user_id}`
     );
 
     return response.data;
@@ -35,7 +35,7 @@ export const getOrderById = async (order_id) => {
     return response.data;
 };
 
-export const getOrderItems = async (order_id) => {
+export const getUserOrderItems = async (order_id) => {
     const response = await api.get(
         `/users/orders/${order_id}/items`
     );
@@ -45,11 +45,25 @@ export const getOrderItems = async (order_id) => {
 
 // resto side
 
-export const getRestaurantOrders = async () => {
+export const getRestaurantOrders = async (restaurant_id) => {
     const response = await api.get(
-        '/restaurants/orders'
+        `/restaurants/orders/all/${restaurant_id}`
     );
 
+    return response.data;
+};
+
+export const getRestaurantOrderById = async (order_id) => {
+    const response = await api.get(
+        `/restaurants/orders/${order_id}`
+    );
+    return response.data;
+};
+
+export const getRestaurantOrderItems = async (order_id) => {
+    const response = await api.get(
+        `/restaurants/orders/${order_id}/items`
+    );
     return response.data;
 };
 

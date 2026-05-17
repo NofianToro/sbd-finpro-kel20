@@ -25,8 +25,15 @@ export const getAllRestaurants = async () => {
 
 export const getRestaurantByUsername = async (username) => {
     const response = await api.get(
-        `/restaurants/${username}`
+        `/restaurants/restaurant/${username}`
     );
 
+    return response.data;
+};
+export const updateRestaurantImage = async ( restaurant_id,url_img) => {
+    const response = await api.put(
+        `/restaurants/profile/image/${restaurant_id}`,
+        { url_img }
+    );
     return response.data;
 };

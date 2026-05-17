@@ -132,7 +132,38 @@ const foodRepository ={
         } catch (error) {
             throw error;
         }
+    },
+    updateFoodStock: async (
+    food_id,
+    stockChange
+) => {
+
+    const query = `
+        UPDATE food
+        SET stok = stok + $1
+        WHERE food_id = $2
+        AND stok + $1 >= 0
+        RETURNING
+            food_id,
+            food_name,
+            stok;
+    `;
+
+    try {
+
+        const result =
+            await db.query(
+                query,
+                [stockChange, food_id]
+            );
+
+        return result.rows[0];
+
+    } catch (error) {
+
+        throw error;
     }
+},
 };
 
 module.exports = foodRepository;

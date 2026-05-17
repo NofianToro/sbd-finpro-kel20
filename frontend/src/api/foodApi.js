@@ -37,20 +37,14 @@ export const createFood = async (foodData) => {
     );
     return response.data;
 };
-
-export const updateFood = async (food_id,foodData) => {
+//use + to add, - to reduce stock
+export const updateFoodStock = async (food_id,foodData) => {
     const response = await api.put(
-        `/restaurants/foods/${food_id}`,
+        `/restaurants/foods/${food_id}/stock`,
         foodData
     );
 
     return response.data;
 };
 
-export const deleteFood = async (food_id) => {
-    const response = await api.delete(
-        `/restaurants/foods/${food_id}`
-    );
-
-    return response.data;
-};
+// not implementing delete yet

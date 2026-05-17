@@ -15,9 +15,9 @@ export const removeFavorite = async (food_id) => {
     return response.data;
 };
 
-export const getMyFavorites = async () => {
+export const getFavoritesByUserId = async (user_id) => {
     const response = await api.get(
-        '/users/favorites'
+        `/users/favorites/${user_id}`
     );
 
     return response.data;

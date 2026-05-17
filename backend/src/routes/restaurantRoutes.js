@@ -29,6 +29,7 @@ router.get("/:restaurant_id/foods", foodController.getFoodByRestaurantId);
 
 // restricted food routes 
 router.post("/foods", authenticateToken, authorizeRoles("restaurant"), foodController.createFood);
+router.put("/foods/:food_id/stock", authenticateToken, authorizeRoles('restaurant'), foodController.updateFoodStock);
 
 // edit profile restaurant
 router.put("/profile/image/:restaurant_id", authenticateToken,authorizeRoles("restaurant"), restaurantController.updateRestaurantImage);

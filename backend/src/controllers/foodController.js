@@ -140,6 +140,40 @@ const foodController = {
             });
         }
     },
+    updateFoodStock: async (req, res) => {
+    try {
+        const { food_id } = req.params;
+        const { stockChange } = req.body;
+        if (
+            stockChange === undefined
+        ) {
+            return res.status(400).json({
+                success: false,
+                message:'stockChange is required',
+                data: null
+            });
+        }
+        const food = await foodRepo.updateFoodStock(food_id, stockChange);
+        if (!food) {
+            return res.status(400).json({
+                success: false,
+                message:'Insufficient stock',
+                data: null
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message:'Successfully updated stock',
+            data: food
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message:'Internal Server Error',
+            data: error.message
+        });
+    }
+},
 };
 
 module.exports = foodController;
