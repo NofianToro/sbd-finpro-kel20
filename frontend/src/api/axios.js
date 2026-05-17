@@ -8,9 +8,12 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Only inject user token if Authorization isn't already explicitly set
+        if (!config.headers.Authorization) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
         return config;
     },
@@ -18,4 +21,5 @@ api.interceptors.request.use(
         return Promise.reject(error);
     }
 );
+
 export default api;

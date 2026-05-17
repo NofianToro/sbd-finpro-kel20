@@ -3,9 +3,7 @@ require("dotenv").config({ path: '.env.new' });
 
 const pool = new Pool({
   connectionString: process.env.PG_CONNECTION_STRING,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: { rejectUnauthorized: false }
 });
 
 const connect = async () => {
@@ -19,8 +17,8 @@ const connect = async () => {
   }
 };
 
-const query = async(text, params) =>{
+const query = async (text, params) => {
   return await pool.query(text, params);
 };
 
-module.exports = {connect, query, pool,};
+module.exports = { connect, query, pool, };
