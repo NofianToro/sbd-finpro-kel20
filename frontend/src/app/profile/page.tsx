@@ -9,9 +9,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {getUserProfile,topUpSaldo} from "../../api/userApi";
 import {getUserOrders} from "../../api/orderApi";
 import {getFavoritesByUserId} from "../../api/favoriteApi";
+import { useRouter } from "next/navigation";
 
 
 export default function ProfileDashboard() {
+  const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<any[]>([]);
@@ -189,9 +191,24 @@ export default function ProfileDashboard() {
                           <span className="text-sm font-semibold text-gray-600 max-w-[400px] truncate">{order.items}</span>
                           <span className="font-bold text-lg text-[#C62828]">Rp {Number(order.order_amount).toLocaleString("id-ID")}</span>
                         </div>
-                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-[#1C1C1C] font-semibold text-sm rounded-lg transition-colors">
-                          <FaRedo /> Reorder
-                        </button>
+                        <button
+
+  onClick={() => {
+
+    localStorage.setItem(
+      "current_order_id",
+      String(order.order_id)
+    );
+
+    router.push("/tracking");
+  }}
+
+  className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-[#1C1C1C] font-semibold text-sm rounded-lg transition-colors"
+>
+  <FaRedo />
+
+  Track Order
+</button>
                       </div>
                     </div>
                   ))}
