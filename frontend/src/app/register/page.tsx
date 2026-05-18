@@ -37,7 +37,7 @@ export default function Register() {
           <Link href="/explore" className="hover:text-gray-300">Explore</Link>
           <Link href="/favorites" className="hover:text-gray-300">Favorites</Link>
           <Link href="/orders" className="hover:text-gray-300">Orders</Link>
-          <Link href="/register" className="hover:text-gray-300">Log In</Link>
+          <Link href="/login" className="hover:text-gray-300">Log In</Link>
         </div>
       </nav>
 
